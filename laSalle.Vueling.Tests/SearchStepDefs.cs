@@ -23,7 +23,7 @@ namespace laSalle.Vueling.Tests
         [AfterScenario]
         public void AfterScenario()
         {
-
+            _driver.Close();
         }
 
         [Given(@"I'm main page")]

@@ -80,6 +80,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bindings.cs" />
+    <Compile Include="builders\SearchBuilder.cs" />
+    <Compile Include="builders\SearchDataBuilder.cs" />
+    <Compile Include="domain\Search.cs" />
     <Compile Include="reservation.feature.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -87,6 +90,7 @@
     </Compile>
     <Compile Include="SearchStepDefs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="services\SearchService.cs" />
     <Compile Include="UnitTest1.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -8,12 +8,14 @@ using System.Web;
 
 namespace laSalle.Vueling.pages
 {
-    public class SearchPage 
+    public class SearchPage : PageObject
     {
         private static ILog LOGGER = LogManager.GetLogger(typeof(SearchPage));
 
         public IWebElement SelectFrom {get;set;}
+        public IWebElement SelectFromTextBox {get;set;}
         public IWebElement SelectTo {get;set;}
+        public IWebElement SelectToTextBox {get;set;}
         public IWebElement SelectDates {get;set;}
         public IWebElement BtnSearch {get;set;}
 
@@ -21,8 +23,16 @@ namespace laSalle.Vueling.pages
             LOGGER.Debug($"Search starts, search: {search}");
 
             SelectFrom.Click();
+            
+            TypeInto(SelectFromTextBox, search.FromLocation);
+            TypeInto(SelectFromTextBox, Keys.Enter);
 
+            TypeInto(SelectFromTextBox, search.ToLocation);
+            TypeInto(SelectFromTextBox, Keys.Enter);
 
+            SelectDates.Click();
+            
+            BtnSearch.Click();
         }
     }
 }
