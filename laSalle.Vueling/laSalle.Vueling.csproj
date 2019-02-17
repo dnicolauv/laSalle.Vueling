@@ -80,6 +80,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="domain\SearchDTO.cs" />
+    <Compile Include="domain\TimePeriods.cs" />
     <Compile Include="pages\PageObject.cs" />
     <Compile Include="pages\SearchPage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

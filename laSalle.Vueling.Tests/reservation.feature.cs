@@ -109,8 +109,8 @@ namespace laSalle.Vueling.Tests
                         "Return",
                         "passengers"});
             table1.AddRow(new string[] {
+                        "Almería",
                         "Alicante",
-                        "Aalborg",
                         "NEXT_WEEK",
                         "",
                         "1"});

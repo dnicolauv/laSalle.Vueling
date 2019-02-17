@@ -8,5 +8,5 @@
     Given I'm main page
     When I try to find a fly
       | Origin   | Destination | Outbound  | Return | passengers |
-      | Alicante | Aalborg     | NEXT_WEEK |        | 1          |
+      | Almería  | Alicante    | NEXT_WEEK |        | 1          |
     Then I get available flight

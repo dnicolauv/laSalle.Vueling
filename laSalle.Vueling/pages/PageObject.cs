@@ -12,5 +12,17 @@ namespace laSalle.Vueling.pages
         {
             element.SendKeys(text);
         }
+
+        public ICollection<IWebElement> GetTableRows(IWebElement table)
+        {
+            var tableCells = table.FindElements(By.TagName("tr"));
+            return tableCells;
+        }
+
+        public ICollection<IWebElement> GetTableCells(IWebElement table)
+        {
+            var tableCells = table.FindElements(By.TagName("td"));
+            return tableCells;
+        }
     }
 }

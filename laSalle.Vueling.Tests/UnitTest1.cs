@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Linq;
 using log4net;
 using OpenQA.Selenium;
 using NUnit.Framework;
 using OpenQA.Selenium.Firefox;
+using System.Collections.Generic;
 
 namespace laSalle.Vueling.Tests
 {
@@ -50,8 +52,24 @@ namespace laSalle.Vueling.Tests
             destinationTxt.SendKeys("Aalborg");
             destinationTxt.SendKeys(Keys.Enter);
             
-            IWebElement startDate = driver.FindElement(By.CssSelector("#ui-datepicker-div > div.ui-datepicker-group.ui-datepicker-group-first > table > tbody > tr:nth-child(4) > td:nth-child(6) > a"));
-            startDate.Click();
+            //IWebElement startDate = driver.FindElement(By.CssSelector("#ui-datepicker-div > div.ui-datepicker-group.ui-datepicker-group-first > table > tbody > tr:nth-child(4) > td:nth-child(6) > a"));
+            //startDate.Click();
+
+            var datePickerTables = driver.FindElements(By.ClassName("ui-datepicker-calendar"));
+            foreach(var datePickerTable in datePickerTables)
+            {
+                var tableCells = datePickerTable.FindElements(By.TagName("td"));
+
+                var today = tableCells.Where(x => x.GetAttribute("data-month") == (DateTime.Now.Month - 1).ToString() &&
+                                                  x.GetAttribute("data-year") == DateTime.Now.Year.ToString() &&
+                                                  x.Text == "23" /*DateTime.Now.Day.ToString()*/).FirstOrDefault();
+
+                if(today != null)
+                {
+                    today.Click();
+                    break;
+                }
+            }
 
             IWebElement searchButton = driver.FindElement(By.Id(("btnSubmitHomeSearcher")));
             searchButton.Click();
