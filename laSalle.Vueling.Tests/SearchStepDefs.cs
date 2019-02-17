@@ -1,4 +1,6 @@
-﻿using BoDi;
+﻿using AventStack.ExtentReports;
+using AventStack.ExtentReports.Reporter;
+using BoDi;
 using laSalle.Vueling.pages;
 using laSalle.Vueling.Tests.builders;
 using laSalle.Vueling.Tests.domain;
@@ -8,6 +10,7 @@ using log4net;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenQA.Selenium;
 using System;
+using System.IO;
 using TechTalk.SpecFlow;
 
 namespace laSalle.Vueling.Tests
@@ -17,12 +20,17 @@ namespace laSalle.Vueling.Tests
     {
         private static ILog LOGGER = LogManager.GetLogger(typeof(SearchStepDefs));
         private IObjectContainer objectContainer;
-        private static SeleniumContext seleniumContext ;
+        private static SeleniumContext seleniumContext;
+
+        private static ExtentReports extent;
+        private static ExtentTest test;
+        private static ExtentReportContext reportContext;
+        
         private static SearchPage searchPage;
 
         private string origin = "";
         private string destination = "";
-        private TimePeriod outbound = new TimePeriod();
+        private TimePeriod outbound;
 
         public SearchStepDefs(IObjectContainer container)
         {
@@ -34,7 +42,16 @@ namespace laSalle.Vueling.Tests
         public static void BeforeTestRun()
         {
             LOGGER.Debug("BeforeTestRun starts");
-            seleniumContext = new SeleniumContext();
+
+            /*REPORT*/
+            reportContext = new ExtentReportContext();
+            extent = new ExtentReports();
+            extent.AttachReporter(reportContext.HtmlReport);
+            test = extent.CreateTest("Vueling search flight test", "");
+            test.Log(Status.Info, "Test starting");
+            /*REPORT*/
+
+            seleniumContext = new SeleniumContext();            
         }
 
         [BeforeScenario]
@@ -42,13 +59,54 @@ namespace laSalle.Vueling.Tests
         {
             LOGGER.Debug("BeforeScenario starts");   
             searchPage = new SearchPage();
+            test.Log(Status.Info, "Scenario starting");
+        }
+
+        [AfterStep]
+        public static void AfterStep()
+        {
+            string screenShotPath = reportContext.Capture(seleniumContext.WebDriver, ScenarioContext.Current.StepContext.StepInfo.Text);
+            test.Log(Status.Info, "Snapshot below: " );
+            test.AddScreenCaptureFromPath(screenShotPath);
         }
 
         [AfterScenario]
         public static void AfterScenario()
         {
-            LOGGER.Debug("AfterScenario starts");    
-            seleniumContext.WebDriver.Close();
+            LOGGER.Debug("AfterScenario starts");                     
+            
+            try
+            {
+                if(ScenarioContext.Current.ScenarioExecutionStatus == ScenarioExecutionStatus.OK)
+                {
+                    string screenShotBase64 = reportContext.Capture(seleniumContext.WebDriver, "TEST PASSED");
+                    test.Log(Status.Pass, "Snapshot below: " );
+                    test.AddScreenCaptureFromBase64String(screenShotBase64);
+                    //test.Pass("TEST PASSED", 
+                    //    MediaEntityBuilder.CreateScreenCaptureFromPath("screenshot.png").Build());
+                }
+                else
+                {
+                    string screenShotBase64 = reportContext.Capture(seleniumContext.WebDriver, "TEST FAILED");
+                    test.Log(Status.Fail, "Snapshot below: ");
+                    test.AddScreenCaptureFromBase64String(screenShotBase64);
+                    //test.Fail("TEST PASSED", 
+                    //    MediaEntityBuilder.CreateScreenCaptureFromPath("screenshot.png").Build());
+                }
+            }
+            catch(Exception ex)
+            {
+                string screenShotBase64 = reportContext.Capture(seleniumContext.WebDriver, "TEST ERROR");
+                test.Log(Status.Error, "Snapshot below: " );
+                test.AddScreenCaptureFromBase64String(screenShotBase64);
+                //test.Error("TEST ERROR", 
+                //        MediaEntityBuilder.CreateScreenCaptureFromPath("screenshot.png").Build());
+            }
+            finally
+            {                
+                seleniumContext.WebDriver.Quit();
+                extent.Flush();
+            }            
         }
 
         [Given(@"I'm main page")]
@@ -56,7 +114,7 @@ namespace laSalle.Vueling.Tests
         {
             seleniumContext.WebDriver.Manage().Timeouts().ImplicitWait = new TimeSpan(0, 0, 10);
             seleniumContext.WebDriver.Manage().Window.Maximize();
-            seleniumContext.WebDriver.Url =  searchPage.HOME_URL;              
+            seleniumContext.WebDriver.Url = searchPage.HOME_URL;            
         }
         
         [When(@"I try to find a fly")]
@@ -73,7 +131,7 @@ namespace laSalle.Vueling.Tests
         [Then(@"I get available flight")]
         public void ThenIGetAvailableFlight()
         {
-            Assert.IsTrue(seleniumContext.WebDriver.Url == searchPage.SCHEDULE_URL);
+            Assert.IsTrue(seleniumContext.WebDriver.Url == searchPage.SCHEDULE_URL);           
         }   
         
         public void GetSpecFlowValues(Table table)

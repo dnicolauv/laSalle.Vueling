@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace laSalle.Vueling.Tests.domain
 {
-    public class TimePeriod
+    public abstract class TimePeriod
     {
-        public DateTime GetDateTime()
+        public virtual DateTime GetDateTime()
         { 
             return DateTime.MinValue;    
         }
@@ -26,14 +26,14 @@ namespace laSalle.Vueling.Tests.domain
                 case "TOMORROW" : return new TOMORROW();
                 case "NEXT_WEEK" : return new NEXT_WEEK();
                 case "NEXT_MONTH" : return new NEXT_MONTH();
-            }
-            return new TimePeriod();
+                default: return new TODAY();
+            }            
         }
     }
 
     public class TODAY : TimePeriod
     {
-        public DateTime GetDateTime()
+        public override DateTime GetDateTime()
         {
             return DateTime.Now;
         }
@@ -41,7 +41,7 @@ namespace laSalle.Vueling.Tests.domain
 
     public class TOMORROW : TimePeriod
     {
-        public DateTime GetDateTime()
+        public override DateTime GetDateTime()
         {
             return DateTime.Now.AddDays(1);
         }
@@ -49,7 +49,7 @@ namespace laSalle.Vueling.Tests.domain
 
     public class NEXT_WEEK : TimePeriod
     {
-        public DateTime GetDateTime()
+        public override DateTime GetDateTime()
         {
             return DateTime.Now.AddDays(7);
         }
@@ -57,7 +57,7 @@ namespace laSalle.Vueling.Tests.domain
 
     public class NEXT_MONTH : TimePeriod
     {
-        public DateTime GetDateTime()
+        public override DateTime GetDateTime()
         {
             return DateTime.Now.AddMonths(1);
         }

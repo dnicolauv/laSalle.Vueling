@@ -64,6 +64,7 @@ namespace laSalle.Vueling.pages
                 if(date != null)
                 {
                     date.Click();
+                    break;
                 }
             }
         }        
