@@ -138,6 +138,7 @@
   <ItemGroup />
   <ItemGroup>
     <Content Include="Extent-Config.xml" />
+    <Content Include="reports\Capture.PNG" />
     <Content Include="reports\dashboard.html" />
     <Content Include="reports\I get available flight.png" />
     <Content Include="reports\I try to find a fly.png" />
