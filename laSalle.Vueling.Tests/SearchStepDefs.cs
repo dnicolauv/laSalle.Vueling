@@ -1,6 +1,7 @@
 ﻿using AventStack.ExtentReports;
 using AventStack.ExtentReports.Reporter;
 using BoDi;
+using laSalle.Vueling.domain;
 using laSalle.Vueling.pages;
 using laSalle.Vueling.Tests.builders;
 using laSalle.Vueling.Tests.domain;
@@ -20,17 +21,12 @@ namespace laSalle.Vueling.Tests
     {
         private static ILog LOGGER = LogManager.GetLogger(typeof(SearchStepDefs));
         private IObjectContainer objectContainer;
+        
         private static SeleniumContext seleniumContext;
-
-        private static ExtentReports extent;
-        private static ExtentTest test;
         private static ExtentReportContext reportContext;
         
         private static SearchPage searchPage;
-
-        private string origin = "";
-        private string destination = "";
-        private TimePeriod outbound;
+        private Search search;
 
         public SearchStepDefs(IObjectContainer container)
         {
@@ -42,16 +38,9 @@ namespace laSalle.Vueling.Tests
         public static void BeforeTestRun()
         {
             LOGGER.Debug("BeforeTestRun starts");
-
-            /*REPORT*/
-            reportContext = new ExtentReportContext();
-            extent = new ExtentReports();
-            extent.AttachReporter(reportContext.HtmlReport);
-            test = extent.CreateTest("Vueling search flight test", "");
-            test.Log(Status.Info, "Test starting");
-            /*REPORT*/
-
             seleniumContext = new SeleniumContext();            
+            reportContext = new ExtentReportContext(seleniumContext);
+            reportContext.Log(Status.Info, "Test starting");          
         }
 
         [BeforeScenario]
@@ -59,56 +48,16 @@ namespace laSalle.Vueling.Tests
         {
             LOGGER.Debug("BeforeScenario starts");   
             searchPage = new SearchPage();
-            test.Log(Status.Info, "Scenario starting");
+            reportContext.Log(Status.Info, "Scenario starting");
         }
 
         [AfterStep]
         public static void AfterStep()
         {
-            string screenShotPath = reportContext.Capture(seleniumContext.WebDriver, ScenarioContext.Current.StepContext.StepInfo.Text);
-            test.Log(Status.Info, "Snapshot below: " );
-            test.AddScreenCaptureFromPath(screenShotPath);
+            LOGGER.Debug("AftrStep starts");   
+            reportContext.TakeScreenshotAndLog(Status.Info, ScenarioContext.Current.StepContext.StepInfo.Text);        
         }
-
-        [AfterScenario]
-        public static void AfterScenario()
-        {
-            LOGGER.Debug("AfterScenario starts");                     
-            
-            try
-            {
-                if(ScenarioContext.Current.ScenarioExecutionStatus == ScenarioExecutionStatus.OK)
-                {
-                    string screenShotBase64 = reportContext.Capture(seleniumContext.WebDriver, "TEST PASSED");
-                    test.Log(Status.Pass, "Snapshot below: " );
-                    test.AddScreenCaptureFromBase64String(screenShotBase64);
-                    //test.Pass("TEST PASSED", 
-                    //    MediaEntityBuilder.CreateScreenCaptureFromPath("screenshot.png").Build());
-                }
-                else
-                {
-                    string screenShotBase64 = reportContext.Capture(seleniumContext.WebDriver, "TEST FAILED");
-                    test.Log(Status.Fail, "Snapshot below: ");
-                    test.AddScreenCaptureFromBase64String(screenShotBase64);
-                    //test.Fail("TEST PASSED", 
-                    //    MediaEntityBuilder.CreateScreenCaptureFromPath("screenshot.png").Build());
-                }
-            }
-            catch(Exception ex)
-            {
-                string screenShotBase64 = reportContext.Capture(seleniumContext.WebDriver, "TEST ERROR");
-                test.Log(Status.Error, "Snapshot below: " );
-                test.AddScreenCaptureFromBase64String(screenShotBase64);
-                //test.Error("TEST ERROR", 
-                //        MediaEntityBuilder.CreateScreenCaptureFromPath("screenshot.png").Build());
-            }
-            finally
-            {                
-                seleniumContext.WebDriver.Quit();
-                extent.Flush();
-            }            
-        }
-
+      
         [Given(@"I'm main page")]
         public void GivenIMMainPage()
         {
@@ -122,9 +71,9 @@ namespace laSalle.Vueling.Tests
         {    
             GetSpecFlowValues(table);            
             StartSearching();
-            SearchOrigin(origin);
-            SearchDestination(destination);
-            SelectDate(outbound);            
+            SearchOrigin(search.FromLocation);
+            SearchDestination(search.ToLocation);
+            SelectDate(search.OnDate);            
             Search();            
         }        
 
@@ -134,12 +83,36 @@ namespace laSalle.Vueling.Tests
             Assert.IsTrue(seleniumContext.WebDriver.Url == searchPage.SCHEDULE_URL);           
         }   
         
+        [AfterScenario]
+        public static void AfterScenario()
+        {
+            LOGGER.Debug("AfterScenario starts");                     
+            
+            try
+            {
+                if(ScenarioContext.Current.ScenarioExecutionStatus == ScenarioExecutionStatus.OK)
+                    reportContext.TakeScreenshotAndLog(Status.Pass, "TEST PASSED");   
+                else
+                    reportContext.TakeScreenshotAndLog(Status.Fail, "TEST FAILED");                  
+            }
+            catch(Exception ex)
+            {
+                reportContext.TakeScreenshotAndLog(Status.Error, "TEST ERROR");   
+            }
+            finally
+            {                
+                seleniumContext.WebDriver.Quit();
+                reportContext.Flush();
+            }            
+        }
+
         public void GetSpecFlowValues(Table table)
         {
             SpecFlowTableReader specFlowReader = new SpecFlowTableReader(table);
-            origin = specFlowReader.GetValue("Origin");
-            destination = specFlowReader.GetValue("Destination");
-            outbound = TimePeriod.GetInstance(specFlowReader.GetValue("Outbound"));
+            search = new Search();
+            search.FromLocation = specFlowReader.GetValue("Origin");
+            search.ToLocation = specFlowReader.GetValue("Destination");
+            search.OnDate = TimePeriod.GetInstance(specFlowReader.GetValue("Outbound"));
         }
 
         public void StartSearching()

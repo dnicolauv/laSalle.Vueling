@@ -1,4 +1,5 @@
 ﻿using laSalle.Vueling.domain;
+using laSalle.Vueling.Tests.domain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace laSalle.Vueling.Tests.builders
     private Guid id;
     private String from;
     private String to;
-    private DateTime on;
+    private TimePeriod on;
 
     private SearchBuilder() {
     }
@@ -37,7 +38,7 @@ namespace laSalle.Vueling.Tests.builders
     }
 
 
-    public SearchBuilder OnDate(DateTime date) {
+    public SearchBuilder OnDate(TimePeriod date) {
         this.on = date;
         return this;
     }

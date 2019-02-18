@@ -1,4 +1,5 @@
-﻿using System;
+﻿using laSalle.Vueling.Tests.domain;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,7 +14,7 @@ namespace laSalle.Vueling.Tests.builders
             return SearchBuilder
                     .AReservation()
                     .WithId(id)                
-                    .OnDate(DateTime.Now.AddDays(1));
+                    .OnDate(new TODAY());
         }
     }
 }
